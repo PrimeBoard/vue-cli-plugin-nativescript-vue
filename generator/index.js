@@ -78,7 +78,7 @@ module.exports = async (api, options, rootOptions) => {
       'clean:ios': 'rimraf platforms/ios'
     },
     dependencies: {
-      'nativescript-vue': '^2.5.0-alpha.3',
+      'nativescript-vue': '^2.9.0',
       'tns-core-modules': '^6.3.2'
     },
     devDependencies: {

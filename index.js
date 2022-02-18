@@ -12,8 +12,8 @@ const TerserPlugin = require('terser-webpack-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const NsVueTemplateCompiler = require('nativescript-vue-template-compiler');
 
-const nsWebpack = require('nativescript-dev-webpack');
-const nativescriptTarget = require('nativescript-dev-webpack/nativescript-target');
+const nsWebpack = require('@nativescript/webpack');
+const nativescriptTarget = require('@nativescript/webpack/nativescript-target');
 const { NativeScriptWorkerPlugin } = require('nativescript-worker-loader/NativeScriptWorkerPlugin');
 
 const hashSalt = Date.now().toString();
@@ -151,7 +151,6 @@ module.exports = (api, projectOptions) => {
 
   // setup output directory depending on if we're building for web or native
   projectOptions.outputDir = join(projectRoot, appMode === 'web' ? 'dist' : nsWebpack.getAppPath(platform, projectRoot));
-
   return appMode === 'web' ? webConfig(api, projectOptions, env, projectRoot) : nativeConfig(api, projectOptions, env, projectRoot, platform);
 };
 
@@ -165,14 +164,14 @@ const nativeConfig = (api, projectOptions, env, projectRoot, platform) => {
   const isNativeOnly = !fs.pathExistsSync(resolve(projectRoot, 'src'));
   const tsconfigFileName = 'tsconfig.json';
 
-  const appComponents = ['tns-core-modules/ui/frame', 'tns-core-modules/ui/frame/activity'];
+  const appComponents = ['@nativescript/core/ui/frame', '@nativescript/core/ui/frame/activity'];
 
   const platforms = ['ios', 'android'];
 
   // Default destination inside platforms/<platform>/...
   const dist = projectOptions.outputDir;
   const appResourcesPlatformDir = platform === 'android' ? 'Android' : 'iOS';
-
+  console.log("ENV :>>", env)
   const {
     // The 'appPath' and 'appResourcesPath' values are fetched from
     // the nsconfig.json configuration file
@@ -208,12 +207,12 @@ const nativeConfig = (api, projectOptions, env, projectRoot, platform) => {
   const entryModule = nsWebpack.getEntryModule(appFullPath, platform);
   const entryPath = `.${sep}${entryModule}`;
   const entries = { bundle: entryPath };
-  const areCoreModulesExternal = Array.isArray(env.externals) && env.externals.some((e) => e.indexOf('tns-core-modules') > -1);
+  const areCoreModulesExternal = Array.isArray(env.externals) && env.externals.some((e) => e.indexOf('@nativescript/core') > -1);
   // // if (platform === 'ios' ) {
   // //   entries['tns_modules/tns-core-modules/inspector_modules'] = 'inspector_modules.js';
   // // }
   if (platform === 'ios' && !areCoreModulesExternal) {
-    entries['tns_modules/tns-core-modules/inspector_modules'] = 'inspector_modules';
+    entries['tns_modules/@nativescript/core/inspector_modules'] = 'inspector_modules';
   }
 
   console.log(`Bundling application for entryPath ${entryPath}...`);
@@ -290,9 +289,9 @@ const nativeConfig = (api, projectOptions, env, projectRoot, platform) => {
     config.resolve.modules.delete(resolve(projectRoot, 'node_modules'));
 
     config.resolve.modules // Resolve {N} system modules from tns-core-modules
-      .add(resolve(projectRoot, 'node_modules/tns-core-modules'))
+      .add(resolve(projectRoot, 'node_modules/@nativescript/core'))
       .add(resolve(projectRoot, 'node_modules'))
-      .add('node_modules/tns-core-modules')
+      .add('node_modules/@nativescript/core')
       .add('node_modules')
       .end()
       .alias.delete('vue$')
@@ -368,8 +367,8 @@ const nativeConfig = (api, projectOptions, env, projectRoot, platform) => {
       .rule('native-loaders')
       // .test(new RegExp(entryPath)) --> OLD ENTRY - TO BE REMOVED
       .test(new RegExp(nsWebpack.getEntryPathRegExp(appFullPath, entryPath + '.(js|ts)')))
-      .use('nativescript-dev-webpack/bundle-config-loader')
-      .loader('nativescript-dev-webpack/bundle-config-loader')
+      .use('@nativescript/webpack/bundle-config-loader')
+      .loader('@nativescript/webpack/bundle-config-loader')
       .options({
         registerPages: true, // applicable only for non-angular apps
         loadCss: !snapshot, // load the application css if in debug mode
@@ -383,12 +382,12 @@ const nativeConfig = (api, projectOptions, env, projectRoot, platform) => {
     config.when(platform === 'android', (config) => {
       config.module
         .rule('native-loaders')
-        .use('nativescript-dev-webpack/android-app-components-loader')
-        .loader('nativescript-dev-webpack/android-app-components-loader')
+        .use('@nativescript/webpack/helpers/android-app-components-loader')
+        .loader('@nativescript/webpack/helpers/android-app-components-loader')
         .options({
           modules: appComponents
         })
-        .before('nativescript-dev-webpack/bundle-config-loader')
+        .before('@nativescript/webpack/bundle-config-loader')
         .end();
     });
 
@@ -527,13 +526,13 @@ const nativeConfig = (api, projectOptions, env, projectRoot, platform) => {
     config.module
       .rule('css')
       .oneOf('normal')
-      .use('nativescript-dev-webpack/apply-css-loader')
-      .loader('nativescript-dev-webpack/apply-css-loader')
+      .use('@nativescript/webpack/helpers/apply-css-loader')
+      .loader('@nativescript/webpack/helpers/apply-css-loader')
       .before('css-loader')
       .end()
-      .use('nativescript-dev-webpack/style-hot-loader')
-      .loader('nativescript-dev-webpack/style-hot-loader')
-      .before('nativescript-dev-webpack/apply-css-loader')
+      .use('@nativescript/webpack/helpers/style-hot-loader')
+      .loader('@nativescript/webpack/helpers/style-hot-loader')
+      .before('@nativescript/webpack/helpers/apply-css-loader')
       .end()
       .use('css-loader')
       .loader('css-loader')
@@ -572,13 +571,13 @@ const nativeConfig = (api, projectOptions, env, projectRoot, platform) => {
     config.module
       .rule('scss')
       .oneOf('normal')
-      .use('nativescript-dev-webpack/apply-css-loader')
-      .loader('nativescript-dev-webpack/apply-css-loader')
+      .use('@nativescript/webpack/helpers/apply-css-loader')
+      .loader('@nativescript/webpack/helpers/apply-css-loader')
       .before('css-loader')
       .end()
-      .use('nativescript-dev-webpack/style-hot-loader')
-      .loader('nativescript-dev-webpack/style-hot-loader')
-      .before('nativescript-dev-webpack/apply-css-loader')
+      .use('@nativescript/webpack/helpers/style-hot-loader')
+      .loader('@nativescript/webpack/helpers/style-hot-loader')
+      .before('@nativescript/webpack/helpers/apply-css-loader')
       .end()
       .use('css-loader')
       .loader('css-loader')
@@ -609,7 +608,7 @@ const nativeConfig = (api, projectOptions, env, projectRoot, platform) => {
           {
             // minimize: false,
             // url: false,
-            prependData: '$PLATFORM: ' + platform + ';'
+            // prependData: '$PLATFORM: ' + platform + ';'
           }
         )
       )
@@ -634,13 +633,13 @@ const nativeConfig = (api, projectOptions, env, projectRoot, platform) => {
     config.module
       .rule('sass')
       .oneOf('normal')
-      .use('nativescript-dev-webpack/apply-css-loader')
-      .loader('nativescript-dev-webpack/apply-css-loader')
+      .use('@nativescript/webpack/helpers/apply-css-loader')
+      .loader('@nativescript/webpack/helpers/apply-css-loader')
       .before('css-loader')
       .end()
-      .use('nativescript-dev-webpack/style-hot-loader')
-      .loader('nativescript-dev-webpack/style-hot-loader')
-      .before('nativescript-dev-webpack/apply-css-loader')
+      .use('@nativescript/webpack/helpers/style-hot-loader')
+      .loader('@nativescript/webpack/helpers/style-hot-loader')
+      .before('@nativescript/webpack/helpers/apply-css-loader')
       .end()
       .use('css-loader')
       .loader('css-loader')
@@ -692,13 +691,13 @@ const nativeConfig = (api, projectOptions, env, projectRoot, platform) => {
     config.module
       .rule('stylus')
       .oneOf('normal')
-      .use('nativescript-dev-webpack/apply-css-loader')
-      .loader('nativescript-dev-webpack/apply-css-loader')
+      .use('@nativescript/webpack/helpers/apply-css-loader')
+      .loader('@nativescript/webpack/helpers/apply-css-loader')
       .before('css-loader')
       .end()
-      .use('nativescript-dev-webpack/style-hot-loader')
-      .loader('nativescript-dev-webpack/style-hot-loader')
-      .before('nativescript-dev-webpack/apply-css-loader')
+      .use('@nativescript/webpack/helpers/style-hot-loader')
+      .loader('@nativescript/webpack/helpers/style-hot-loader')
+      .before('@nativescript/webpack/helpers/apply-css-loader')
       .end()
       .use('css-loader')
       .loader('css-loader')
@@ -748,13 +747,13 @@ const nativeConfig = (api, projectOptions, env, projectRoot, platform) => {
     config.module
       .rule('less')
       .oneOf('normal')
-      .use('nativescript-dev-webpack/apply-css-loader')
-      .loader('nativescript-dev-webpack/apply-css-loader')
+      .use('@nativescript/webpack/helpers/apply-css-loader')
+      .loader('@nativescript/webpack/helpers/apply-css-loader')
       .before('css-loader')
       .end()
-      .use('nativescript-dev-webpack/style-hot-loader')
-      .loader('nativescript-dev-webpack/style-hot-loader')
-      .before('nativescript-dev-webpack/apply-css-loader')
+      .use('@nativescript/webpack/helpers/style-hot-loader')
+      .loader('@nativescript/webpack/helpers/style-hot-loader')
+      .before('@nativescript/webpack/helpers/apply-css-loader')
       .end()
       .use('css-loader')
       .loader('css-loader')
@@ -795,14 +794,14 @@ const nativeConfig = (api, projectOptions, env, projectRoot, platform) => {
     //   config.module.rules.push(
     //       {
     //           test: /-page\.js$/,
-    //           use: "nativescript-dev-webpack/script-hot-loader"
+    //           use: "@nativescript/webpack/helpers/script-hot-loader"
     //       },
     //       {
     //           test: /\.(html|xml)$/,
-    //           use: "nativescript-dev-webpack/markup-hot-loader"
+    //           use: "@nativescript/webpack/helpers/markup-hot-loader"
     //       },
 
-    //       { test: /\.(html|xml)$/, use: "nativescript-dev-webpack/xml-namespace-loader" }
+    //       { test: /\.(html|xml)$/, use: "@nativescript/webpack/helpers/xml-namespace-loader" }
     //   );
     // }
 
@@ -847,7 +846,10 @@ const nativeConfig = (api, projectOptions, env, projectRoot, platform) => {
         Object.assign(config.plugin('define').get('args')[0], {
           'global.TNS_WEBPACK': 'true',
           TNS_ENV: JSON.stringify(mode),
-          process: 'global.process'
+          process: 'global.process',
+          __UI_USE_XML_PARSER__: true,
+          __UI_USE_EXTERNAL_RENDERER__: false,
+          __CSS_PARSER__: JSON.stringify('css-tree')
         })
       ])
       .end();
@@ -967,7 +969,7 @@ const nativeConfig = (api, projectOptions, env, projectRoot, platform) => {
         .end();
     }
 
-    // the next several items are disabled as they are mirrored from the nativescript-dev-webpack
+    // the next several items are disabled as they are mirrored from the @nativescript/webpack
     // project.  Need to figure out how to integrate some of that projects cli ability into this one.
     config.when(report, (config) => {
       config
@@ -990,13 +992,14 @@ const nativeConfig = (api, projectOptions, env, projectRoot, platform) => {
         .use(nsWebpack.NativeScriptSnapshotPlugin, [
           {
             chunk: 'vendor',
-            requireModules: ['tns-core-modules/bundle-entry-points'],
+            requireModules: ['@nativescript/core/bundle-entry-points'],
             projectRoot,
             webpackConfig: config
           }
         ])
         .end();
     });
+    console.log(config)
   });
 };
 
