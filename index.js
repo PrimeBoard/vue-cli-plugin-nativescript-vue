@@ -12,13 +12,14 @@ const TerserPlugin = require('terser-webpack-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const NsVueTemplateCompiler = require('nativescript-vue-template-compiler');
 
-const nsWebpack = require('@nativescript/webpack');
-const nativescriptTarget = require('@nativescript/webpack/nativescript-target');
 const { NativeScriptWorkerPlugin } = require('nativescript-worker-loader/NativeScriptWorkerPlugin');
 
 const hashSalt = Date.now().toString();
 
 const DefinePlugin = require('webpack/lib/DefinePlugin');
+
+let nsWebpack
+let nativescriptTarget
 
 // // // TO BE REMOVED SOON
 // // // // eslint-disable-next-line prefer-destructuring
@@ -146,6 +147,11 @@ module.exports = (api, projectOptions) => {
     // throw new Error('You need to provide a target platform!');
   }
 
+  if(platform !== 'web') {
+    nsWebpack = require('@nativescript/webpack');
+    nativescriptTarget = require('@nativescript/webpack/nativescript-target');
+  }
+  
   const projectRoot = api.service.context;
   const appMode = platform === 'android' ? 'native' : platform === 'ios' ? 'native' : 'web';
 
