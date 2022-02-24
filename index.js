@@ -4,7 +4,7 @@ const { relative, resolve, sep, join } = require('path');
 const fs = require('fs-extra');
 
 const webpack = require('webpack');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+// const CleanWebpackPlugin = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const TerserPlugin = require('terser-webpack-plugin');
@@ -12,14 +12,13 @@ const TerserPlugin = require('terser-webpack-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const NsVueTemplateCompiler = require('nativescript-vue-template-compiler');
 
-const { NativeScriptWorkerPlugin } = require('nativescript-worker-loader/NativeScriptWorkerPlugin');
-
 const hashSalt = Date.now().toString();
 
 const DefinePlugin = require('webpack/lib/DefinePlugin');
 
 let nsWebpack
 let nativescriptTarget
+let NativeScriptWorkerPlugin
 
 // // // TO BE REMOVED SOON
 // // // // eslint-disable-next-line prefer-destructuring
@@ -150,8 +149,10 @@ module.exports = (api, projectOptions) => {
   if(platform !== 'web') {
     nsWebpack = require('@nativescript/webpack');
     nativescriptTarget = require('@nativescript/webpack/nativescript-target');
+    ({ NativeScriptWorkerPlugin } = require('nativescript-worker-loader/NativeScriptWorkerPlugin'));
   }
   
+  console.log(NativeScriptWorkerPlugin)
   const projectRoot = api.service.context;
   const appMode = platform === 'android' ? 'native' : platform === 'ios' ? 'native' : 'web';
 
@@ -166,6 +167,7 @@ const resolveExtensions = (config, ext) => {
 
 const nativeConfig = (api, projectOptions, env, projectRoot, platform) => {
   console.log('starting nativeConfig');
+
   process.env.VUE_CLI_TARGET = 'nativescript';
   const isNativeOnly = !fs.pathExistsSync(resolve(projectRoot, 'src'));
   const tsconfigFileName = 'tsconfig.json';
@@ -861,17 +863,17 @@ const nativeConfig = (api, projectOptions, env, projectRoot, platform) => {
       .end();
 
     // Remove all files from the out dir.
-    config
-      .plugin('clean')
-      .use(CleanWebpackPlugin, [
-        itemsToClean,
-        { verbose: !!verbose }
-        // join(dist, '/**/*'),
-        // {
-        //   root: dist
-        // }
-      ])
-      .end();
+    // config
+    //   .plugin('clean')
+    //   .use(CleanWebpackPlugin, [
+    //     itemsToClean,
+    //     { verbose: !!verbose }
+    //     // join(dist, '/**/*'),
+    //     // {
+    //     //   root: dist
+    //     // }
+    //   ])
+    //   .end();
 
     // Copy native app resources to out dir.
     // only if doing a full build (tns run/build) and not previewing (tns preview)
@@ -1138,15 +1140,15 @@ const webConfig = (api, projectOptions, env, projectRoot) => {
     // // //   .end();
 
     // Remove all files from the out dir.
-    config
-      .plugin('clean')
-      .use(CleanWebpackPlugin, [
-        join(dist, '/**/*'),
-        {
-          root: dist
-        }
-      ])
-      .end();
+    // config
+    //   .plugin('clean')
+    //   .use(CleanWebpackPlugin, [
+    //     join(dist, '/**/*'),
+    //     {
+    //       root: dist
+    //     }
+    //   ])
+    //   .end();
 
     // Copy assets to out dir. Add your own globs as needed.
     // if the project is native-only then we want to copy files
