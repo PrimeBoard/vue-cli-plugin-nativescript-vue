@@ -255,13 +255,25 @@ const nativeConfig = (api, projectOptions, env, projectRoot, platform) => {
       .target(nativescriptTarget)
       .end();
 
-    config.entryPoints // clear out old config.entryPoints and install new
-      .clear()
-      .end()
-      .entry('bundle')
-      // .entry(entries)
-      .add(entryPath)
-      .end();
+    if (platform === 'android') {
+      config.entryPoints
+        .clear()
+        .end()
+        .entry('bundle')
+          .add(entryPath)
+          .add('@nativescript/core/globals')
+          .add('@nativescript/core/ui/frame')
+          .add('@nativescript/core/ui/frame/activity')
+          .end();
+    } else {
+      config.entryPoints // clear out old config.entryPoints and install new
+        .clear()
+        .end()
+        .entry('bundle')
+        // .entry(entries)
+        .add(entryPath)
+        .end();
+    }
 
     // clear out old config.output and install new
     config.output.clear().end();
