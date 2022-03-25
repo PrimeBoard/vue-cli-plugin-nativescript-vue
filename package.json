@@ -26,9 +26,7 @@
   "dependencies": {
     "fs-extra": "^8.1.0",
     "globby": "^9.2.0",
-    "replace-in-file": "^4.1.0"
-  },
-  "peerDependencies": {
+    "replace-in-file": "^4.1.0",
     "@vue/cli-service": "^3.11.0",
     "eslint": "^5.16.0",
     "fork-ts-checker-webpack-plugin": "^1.5.0",
@@ -37,7 +35,8 @@
     "nativescript-vue-template-compiler": "^2.4.0",
     "vue-template-compiler": "^2.6.10",
     "webpack": ">=4 < 4.29"
-    
+  },
+  "peerDependencies": {
   },
   "devDependencies": {
     "@vue/cli-plugin-eslint": "^3.11.0",
